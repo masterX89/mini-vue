@@ -12,4 +12,18 @@ describe('effect', () => {
     num.value = 2
     expect(res).toBe(3)
   })
+
+  it('should return runner and runner res when call it', () => {
+    // effect(fn) -> return runner
+    // runner -> fn return
+    let foo = 1
+    const runner = effect(() => {
+      foo++
+      return 'foo'
+    })
+    expect(foo).toBe(2)
+    const r = runner()
+    expect(foo).toBe(3)
+    expect(r).toBe('foo')
+  })
 })

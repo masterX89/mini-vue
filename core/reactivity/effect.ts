@@ -8,7 +8,7 @@ class ReactiveEffect {
   run() {
     // activeEffect 保存的是实例化对象
     activeEffect = this
-    this._fn()
+    return this._fn()
   }
 }
 
@@ -47,4 +47,5 @@ export function effect(fn) {
   // 使用 _effect 实例化对象来处理逻辑
   const _effect = new ReactiveEffect(fn)
   _effect.run()
+  return _effect.run.bind(_effect)
 }
