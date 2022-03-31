@@ -34,12 +34,14 @@ export function track(target, key) {
 }
 
 export function trigger(target, key) {
-  // trigger 是在 set 阶段，即响应式对象的内容发生了变化，所以理论上 dep 应该存在
-  let depsMap = targetMap.get(target)
-  let dep = depsMap.get(key)
-  for (const effect of dep) {
-    effect.run()
-  }
+  // 需要对 depsMap 和 dep 是否存在做出判断
+  const depsMap = targetMap.get(target)
+  if (!depsMap) return
+  const dep = depsMap.get(key)
+  dep &&
+    dep.forEach((effect) => {
+      effect.run()
+    })
 }
 
 let activeEffect
