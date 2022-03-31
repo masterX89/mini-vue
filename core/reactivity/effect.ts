@@ -15,22 +15,20 @@ class ReactiveEffect {
 // target -> key -> dep
 const targetMap = new Map()
 export function track(target, key) {
+  // 边界，注意不要让 undefined 进入 dep
+  if (!activeEffect) return
+
   // 核心是 targetMap -> depsMap -> dep -> dep.add
   // 两个 if 用于 init
   let depsMap = targetMap.get(target)
   if (!depsMap) {
-    depsMap = new Map()
-    targetMap.set(target, depsMap)
+    targetMap.set(target, (depsMap = new Map()))
   }
   let dep = depsMap.get(key)
   if (!dep) {
-    dep = new Set()
-    depsMap.set(key, dep)
+    depsMap.set(key, (dep = new Set()))
   }
-  if (activeEffect) {
-    // 注意不要让 undefined 进入 dep
-    dep.add(activeEffect)
-  }
+  dep.add(activeEffect)
 }
 
 export function trigger(target, key) {
