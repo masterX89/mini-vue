@@ -2,7 +2,7 @@
 // activeEffect 保存了激活的 effect，便于在 track 的时候使用
 class ReactiveEffect {
   private _fn: any
-  constructor(fn) {
+  constructor(fn, public scheduler?) {
     this._fn = fn
   }
   run() {
@@ -38,14 +38,18 @@ export function trigger(target, key) {
   const dep = depsMap.get(key)
   dep &&
     dep.forEach((effect) => {
-      effect.run()
+      if (effect.scheduler) {
+        effect.scheduler()
+      } else {
+        effect.run()
+      }
     })
 }
 
 let activeEffect
-export function effect(fn) {
+export function effect(fn, options: any = {}) {
   // 使用 _effect 实例化对象来处理逻辑
-  const _effect = new ReactiveEffect(fn)
+  const _effect = new ReactiveEffect(fn, options.scheduler)
   _effect.run()
   return _effect.run.bind(_effect)
 }
