@@ -2,7 +2,7 @@ import { reactive } from '../reactive'
 
 describe('reactive', () => {
   it('should be happy path', () => {
-    const original = {
+    const original: any = {
       foo: 1,
     }
     const observed = reactive(original)
