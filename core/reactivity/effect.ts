@@ -1,4 +1,6 @@
-// targetmap 保存了所有的响应式对象：target -> key -> depsMap
+import { extend } from '../shared'
+
+// targetMap 保存了所有的响应式对象：target -> key -> depsMap
 // activeEffect 保存了激活的 effect，便于在 track 的时候使用
 class ReactiveEffect {
   private _fn: any // effectFn
@@ -80,7 +82,7 @@ export function effect(fn, options: any = {}) {
   // 使用 _effect 实例化对象来处理逻辑
   const _effect = new ReactiveEffect(fn)
   // 接收 options
-  Object.assign(_effect, options)
+  extend(_effect, options)
   // 通过实例执行
   _effect.run()
   const runner: any = _effect.run.bind(_effect)
