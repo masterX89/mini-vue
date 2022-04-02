@@ -30,11 +30,14 @@ class ReactiveEffect {
     }
   }
 }
-// 负责通过反向依赖把 effectFn 从依赖收集的 Set 中解除
+
 function cleanupEffect(effect) {
+  // 负责通过反向依赖把 effectFn 从依赖收集的 Set 中解除
   effect.deps.forEach((dep) => {
     dep.delete(effect)
   })
+  // 清空 deps
+  effect.deps.length = 0
 }
 
 // target -> key -> dep -> effect 实例
