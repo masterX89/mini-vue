@@ -1,15 +1,26 @@
 import { track, trigger } from './effect'
+import { ReactiveFlags } from './reactive'
 
 const get = createGetter()
 const set = createSetter()
 const readonlyGet = createGetter(true)
 
 function createGetter(isReadonly: boolean = false) {
+  // 两个出口
   return function (target, key) {
+    // IS_REACTIVE| IS_READONLY
+    // 判断是否为内部的属性，进行拦截
+    if (key === ReactiveFlags.IS_REACTIVE) {
+      return !isReadonly
+    } else if (key === ReactiveFlags.IS_READONLY) {
+      return isReadonly
+    }
+    // 普通响应式数据的逻辑
+    const res = Reflect.get(target, key)
     if (!isReadonly) {
       track(target, key)
     }
-    return Reflect.get(target, key)
+    return res
   }
 }
 
