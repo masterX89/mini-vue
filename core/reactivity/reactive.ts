@@ -25,6 +25,10 @@ function createReactiveObject(raw, baseHandles) {
   return new Proxy(raw, baseHandles)
 }
 
+export function isProxy(value) {
+  return isReactive(value) || isReadonly(value)
+}
+
 export function isReactive(value): boolean {
   // 如果使用字面量字符串传递，则是魔数
   return !!value[ReactiveFlags.IS_REACTIVE]
