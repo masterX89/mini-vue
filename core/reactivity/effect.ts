@@ -1,7 +1,12 @@
 import { extend } from '../shared'
 
-// targetMap 保存了所有的响应式对象：target -> key -> depsMap
+// target -> key -> dep -> effect 实例
+const targetMap = new Map()
 // activeEffect 保存了激活的 effect，便于在 track 的时候使用
+let activeEffect
+// 在 run 函数中开关，在 track 中进行判断
+let shouldTrack
+
 class ReactiveEffect {
   private _fn: any // effectFn
   public scheduler: Function | undefined
@@ -12,9 +17,19 @@ class ReactiveEffect {
     this._fn = fn
   }
   run() {
+    // 手动执行 runner 的分支
+    if (!this.active) {
+      // 为什么不 activeEffect = this？理由可能是手动执行意味着 activeEffect 当前并非是 this
+      // 其实后续 activeEffect 会变为 栈 结构以便于 effect 嵌套执行
+      return this._fn()
+    }
+    // 响应式触发
+    shouldTrack = true
     // activeEffect 保存的是实例化对象
     activeEffect = this
-    return this._fn()
+    const result = this._fn()
+    shouldTrack = false
+    return result
   }
   stop() {
     // 如果用户多次调用 stop，即使已经 cleanup 过，effect 实际不存在于 dep中了
@@ -40,11 +55,11 @@ function cleanupEffect(effect) {
   effect.deps.length = 0
 }
 
-// target -> key -> dep -> effect 实例
-const targetMap = new Map()
 export function track(target, key) {
   // 边界，注意不要让 undefined 进入 dep
   if (!activeEffect) return
+  // 边界，!shouldTrack 时直接返回
+  if (!shouldTrack) return
 
   // 核心是 targetMap -> depsMap -> dep -> dep.add
   // 两个 if 用于 init
@@ -76,7 +91,6 @@ export function trigger(target, key) {
     })
 }
 
-let activeEffect
 // 1. 实例化对象
 // 2. 接受 options
 // 3. 执行 effectFn
