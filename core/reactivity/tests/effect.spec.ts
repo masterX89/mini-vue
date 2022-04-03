@@ -13,6 +13,16 @@ describe('effect', () => {
     expect(res).toBe(3)
   })
 
+  it('should observe nested properties', () => {
+    let dummy
+    const counter = reactive({ nested: { num: 0 } })
+    effect(() => (dummy = counter.nested.num))
+
+    expect(dummy).toBe(0)
+    counter.nested.num = 8
+    expect(dummy).toBe(8)
+  })
+
   it('should return runner and runner res when call it', () => {
     // effect(fn) -> return runner
     // runner -> fn return

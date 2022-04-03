@@ -1,16 +1,26 @@
-import { isReadonly, reactive, readonly } from '../reactive'
+import { isReactive, isReadonly, readonly } from '../reactive'
 
-describe('reactive', () => {
+describe('readonly', () => {
   it('should be happy path', () => {
     const original = { foo: 1, bar: { baz: 2 } }
     const wrapped = readonly(original)
     expect(wrapped).not.toBe(original)
     expect(wrapped.foo).toBe(1)
     // isReadonly
-    expect(isReadonly(original)).toBe(false)
+    expect(isReactive(wrapped)).toBe(false)
     expect(isReadonly(wrapped)).toBe(true)
-    const observed = reactive(original)
-    expect(isReadonly(observed)).toBe(false)
+    expect(isReactive(original)).toBe(false)
+    expect(isReadonly(original)).toBe(false)
+    expect(isReactive(wrapped.bar)).toBe(false)
+    expect(isReadonly(wrapped.bar)).toBe(true)
+    expect(isReactive(original.bar)).toBe(false)
+    expect(isReadonly(original.bar)).toBe(false)
+    // get
+    expect(wrapped.foo).toBe(1)
+    // has
+    expect('foo' in wrapped).toBe(true)
+    // ownKeys
+    expect(Object.keys(wrapped)).toEqual(['foo', 'bar'])
   })
 
   it('should call console.warn when set', () => {
