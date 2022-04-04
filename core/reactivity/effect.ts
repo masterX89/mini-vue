@@ -72,7 +72,17 @@ export function track(target, key) {
   if (!dep) {
     depsMap.set(key, (dep = new Set()))
   }
+  // 依赖收集
+  trackEffects(dep)
+}
 
+export function isTracking() {
+  // 边界，注意不要让 undefined 进入 dep
+  // 边界，!shouldTrack 时直接返回
+  return shouldTrack && activeEffect !== undefined
+}
+
+export function trackEffects(dep) {
   // 常见于 wrapped.foo = 2, set 后还会执行一次 get
   // 而此时的 effect 已经在 dep 中了，其实对于 Set 来说无所谓
   // 但是 deps 就很吃力了，因为它是个 Array 并不判重，会持续增长
@@ -83,17 +93,17 @@ export function track(target, key) {
   activeEffect.deps.push(dep)
 }
 
-function isTracking() {
-  // 边界，注意不要让 undefined 进入 dep
-  // 边界，!shouldTrack 时直接返回
-  return shouldTrack && activeEffect !== undefined
-}
-
+// 1. 找到 dep
+// 2. 触发依赖
 export function trigger(target, key) {
   // 需要对 depsMap 和 dep 是否存在做出判断
   const depsMap = targetMap.get(target)
   if (!depsMap) return
   const dep = depsMap.get(key)
+  triggerEffects(dep)
+}
+
+export function triggerEffects(dep) {
   dep &&
     dep.forEach((effect) => {
       if (effect.scheduler) {
