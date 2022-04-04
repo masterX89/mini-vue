@@ -55,11 +55,12 @@ function cleanupEffect(effect) {
   effect.deps.length = 0
 }
 
+// 1. 边界判断
+// 2. 找到 dep: targetMap -> depsMap -> dep
+// 3. 依赖收集
 export function track(target, key) {
-  // 边界，注意不要让 undefined 进入 dep
-  if (!activeEffect) return
-  // 边界，!shouldTrack 时直接返回
-  if (!shouldTrack) return
+  // 边界判断
+  if (!isTracking()) return
 
   // 核心是 targetMap -> depsMap -> dep -> dep.add
   // 两个 if 用于 init
@@ -71,9 +72,21 @@ export function track(target, key) {
   if (!dep) {
     depsMap.set(key, (dep = new Set()))
   }
+
+  // 常见于 wrapped.foo = 2, set 后还会执行一次 get
+  // 而此时的 effect 已经在 dep 中了，其实对于 Set 来说无所谓
+  // 但是 deps 就很吃力了，因为它是个 Array 并不判重，会持续增长
+  // 到了 cleanup 的部分，就会多出来很多性能消耗
+  if (dep.has(activeEffect)) return
   dep.add(activeEffect)
   // 反向依赖收集
   activeEffect.deps.push(dep)
+}
+
+function isTracking() {
+  // 边界，注意不要让 undefined 进入 dep
+  // 边界，!shouldTrack 时直接返回
+  return shouldTrack && activeEffect !== undefined
 }
 
 export function trigger(target, key) {
