@@ -7,14 +7,19 @@ let activeEffect
 // 在 run 函数中开关，在 track 中进行判断
 let shouldTrack
 
-class ReactiveEffect {
+export class ReactiveEffect {
   private _fn: any // effectFn
   public scheduler: Function | undefined
   deps = [] // 反向依赖的数据结构
   active: boolean = true // active 标识位
   onStop?: () => void
-  constructor(fn) {
+  constructor(fn, scheduler?) {
     this._fn = fn
+    // effect(fn, options?) 存在两个参数且内部使用了 extend(_effect,options)
+    // 所以 _effect 可从 options 中拿到 scheduler
+    // 而 computed(getter) 只有一个参数，内部只 new constructor
+    // 所以必须在 constructor 这里接受两个参数，并传给实例的 scheduler
+    this.scheduler = scheduler
   }
   run() {
     // 手动执行 runner 的分支
