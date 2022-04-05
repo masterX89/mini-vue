@@ -6,6 +6,7 @@ import { reactive } from './reactive'
 class RefImpl {
   private _value: any
   private _rawValue: any
+  public readonly __v_isRef = true
   dep: Set<unknown>
   constructor(value) {
     // 保存原始值，便于后续比较
@@ -48,4 +49,12 @@ function convert(value) {
 
 export function ref(value) {
   return new RefImpl(value)
+}
+
+export function isRef(ref) {
+  return !!ref.__v_isRef
+}
+
+export function unRef(ref) {
+  return isRef(ref) ? ref._value : ref
 }
