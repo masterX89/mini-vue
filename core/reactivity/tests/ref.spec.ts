@@ -1,6 +1,6 @@
 import { effect } from '../effect'
 import { reactive } from '../reactive'
-import { isRef, ref, unRef } from '../ref'
+import { isRef, proxyRefs, ref, unRef } from '../ref'
 describe('ref', () => {
   it('happy path', () => {
     const a = ref(1)
@@ -69,5 +69,36 @@ describe('ref', () => {
     const a = ref(1)
     expect(unRef(a)).toBe(1)
     expect(unRef(1)).toBe(1)
+  })
+
+  it('proxyRefs', () => {
+    const obj = {
+      foo: ref(10),
+      bar: 'test',
+    }
+
+    // ref 是 RefImpl，是需要使用 .value 来读取的
+    // 无需使用 .value 读取的应该使用 Proxy 来拦截 get 以及 set
+    // 所以 newObj 应该是return new Proxy
+    const newObj = proxyRefs(obj)
+    expect(obj.foo.value).toBe(10)
+
+    // get 拦截时，使用 unRef 来脱 ref
+    expect(newObj.foo).toBe(10)
+    expect(newObj.bar).toBe('test')
+
+    // set 拦截时
+    // | newVal | oldVal | 处理
+    // | !isRef | isRef  | ref.value = newVal
+    // | !isRef | !isRef | Reflect.set
+    // | isRef  | isRef  | Reflect.set
+    // | isRef  | !isRef | Reflect.set
+    newObj.foo = 20
+    expect(newObj.foo).toBe(20)
+    expect(obj.foo.value).toBe(20)
+
+    newObj.foo = ref(10)
+    expect(newObj.foo).toBe(10)
+    expect(obj.foo.value).toBe(10)
   })
 })
