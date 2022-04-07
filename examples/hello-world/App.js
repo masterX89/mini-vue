@@ -1,5 +1,7 @@
 import { h } from '../../lib/mini-vue.esm.js'
 
+// 测试代码
+window.self = null
 export const App = {
   setup() {
     return {
@@ -7,6 +9,8 @@ export const App = {
     }
   },
   render() {
+    // 测试代码
+    window.self = this
     return h(
       'div',
       {
@@ -16,7 +20,7 @@ export const App = {
         h('p', { class: 'red' }, 'hello'),
         h('p', { class: 'green' }, 'mini-vue'),
         // this.setupState.msg -> this.msg
-        // this.$el
+        // this.$el -> root element 实例, 给用户直接操作 dom 的方法
         // this.$data
         // 上述通过 代理模式 统一交给用户
         h('p', { class: 'blue' }, this.msg),

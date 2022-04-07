@@ -29,7 +29,8 @@ function processElement(vnode: any, container: any) {
 // 4. 挂载 container.append
 function mountElement(vnode: any, container: any) {
   const { type, props, children } = vnode
-  const el = document.createElement(type)
+  // 这里的 vnode 是 tag, 通过 vnode.el 把 el 传递出来
+  const el = (vnode.el = document.createElement(type))
 
   if (props) {
     for (const key in props) {
@@ -67,14 +68,18 @@ function mountComponent(vnode: any, container: any) {
   setupComponent(instance)
   // 3. setupRenderEffect(instance)
   // 此时 instance 通过 setupComponent 拿到了 render
-  setupRenderEffect(instance, container)
+  setupRenderEffect(instance, vnode, container)
 }
 
-function setupRenderEffect(instance, container) {
+function setupRenderEffect(instance, vnode, container) {
   // setupState | $el | $data 的代理
   const { proxy } = instance
   // render 的 this 指向的是 proxy
   // proxy 读取 setup 返回值的时通过 handler 处理掉了 setupState
   const subTree = instance.render.call(proxy)
   patch(subTree, container)
+  // 递归结束, subTree 是 root element, 即最外层的 tag
+  // 而这个方法里的 vnode 是一个 componentInstance
+  // vnode.el = subTree.el 将 el 传递给了 component
+  vnode.el = subTree.el
 }

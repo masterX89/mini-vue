@@ -15,15 +15,21 @@ export function setupComponent(instance: any) {
 }
 
 // 1. instance.proxy
-// 2. setup?
-// 3. handleSetupResult
+// 2. instance.setupState 判断是否有 setup -> setupResult
+// 3. instance.render 判断是否有 setup -> setupResult -> render
 function setupStatefulComponent(instance: any) {
-  // 处理 instance 中 this 的指向
+  // 代理模式, 使用 proxy
   instance.proxy = new Proxy(instance, {
     // TODO: component handler
-    get(target, key) {
-      const { setupState } = target
-      return setupState[key]
+    get(instance, key) {
+      const { setupState } = instance
+      if (key in setupState) {
+        // 不使用 if 的话，类似 $el 等也会走这个分支
+        return setupState[key]
+      }
+      if (key === '$el') {
+        return instance.vnode.el
+      }
     },
   })
   // instance -> vnode -> type === component -> setupResult = setup()
