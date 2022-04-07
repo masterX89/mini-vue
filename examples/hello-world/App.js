@@ -7,9 +7,11 @@ export const App = {
       'div',
       {
         id: 'root',
-        onClick: () => alert('onClick!'),
       },
-      'hello vue.js'
+      [
+        h('p', { class: 'red' }, 'hello'),
+        h('p', { class: 'green' }, 'mini-vue'),
+      ]
     )
   },
 }

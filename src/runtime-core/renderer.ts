@@ -31,7 +31,6 @@ function mountElement(vnode: any, container: any) {
   const { type, props, children } = vnode
   const el = document.createElement(type)
 
-  // TODO: refactor to function handle props
   if (props) {
     for (const key in props) {
       el.setAttribute(key, props[key])
