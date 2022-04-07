@@ -60,6 +60,7 @@ export function unRef(ref) {
 }
 
 export function proxyRefs(objectWithRefs) {
+  // TODO: proxyRefs handler
   return new Proxy(objectWithRefs, {
     get(target, key) {
       return unRef(Reflect.get(target, key))

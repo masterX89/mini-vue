@@ -69,7 +69,12 @@ function mountComponent(vnode: any, container: any) {
   // 此时 instance 通过 setupComponent 拿到了 render
   setupRenderEffect(instance, container)
 }
+
 function setupRenderEffect(instance, container) {
-  const subTree = instance.render()
+  // setupState | $el | $data 的代理
+  const { proxy } = instance
+  // render 的 this 指向的是 proxy
+  // proxy 读取 setup 返回值的时通过 handler 处理掉了 setupState
+  const subTree = instance.render.call(proxy)
   patch(subTree, container)
 }
