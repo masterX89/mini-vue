@@ -1,3 +1,5 @@
+import { PublicInstanceProxyHandlers } from './componentPublicInstance'
+
 export function createComponentInstance(vnode: any) {
   const component = {
     vnode,
@@ -19,19 +21,8 @@ export function setupComponent(instance: any) {
 // 3. instance.render 判断是否有 setup -> setupResult -> render
 function setupStatefulComponent(instance: any) {
   // 代理模式, 使用 proxy
-  instance.proxy = new Proxy(instance, {
-    // TODO: component handler
-    get(instance, key) {
-      const { setupState } = instance
-      if (key in setupState) {
-        // 不使用 if 的话，类似 $el 等也会走这个分支
-        return setupState[key]
-      }
-      if (key === '$el') {
-        return instance.vnode.el
-      }
-    },
-  })
+  // 这里的解构是为了保持源码一致，源码后续第一个参数会是 instance.ctx
+  instance.proxy = new Proxy({ _: instance }, PublicInstanceProxyHandlers)
   // instance -> vnode -> type === component -> setupResult = setup()
   // instance: {vnode, type}
   // instance -> type === component -> setupResult = setup()
