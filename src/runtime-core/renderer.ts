@@ -59,19 +59,19 @@ function processComponent(vnode: any, container: any) {
   // TODO: updateComponent
 }
 
-function mountComponent(vnode: any, container: any) {
+function mountComponent(initialVNode: any, container: any) {
   // 1. 创建 componentInstance
   // 数据类型: vnode -> component
   // component: {vnode, type}
-  const instance = createComponentInstance(vnode)
+  const instance = createComponentInstance(initialVNode)
   // 2. setupComponent(instance)
   setupComponent(instance)
   // 3. setupRenderEffect(instance)
   // 此时 instance 通过 setupComponent 拿到了 render
-  setupRenderEffect(instance, vnode, container)
+  setupRenderEffect(instance, initialVNode, container)
 }
 
-function setupRenderEffect(instance, vnode, container) {
+function setupRenderEffect(instance, initialVNode, container) {
   // setupState | $el | $data 的代理
   const { proxy } = instance
   // render 的 this 指向的是 proxy
@@ -81,5 +81,5 @@ function setupRenderEffect(instance, vnode, container) {
   // 递归结束, subTree 是 root element, 即最外层的 tag
   // 而这个方法里的 vnode 是一个 componentInstance
   // vnode.el = subTree.el 将 el 传递给了 component
-  vnode.el = subTree.el
+  initialVNode.el = subTree.el
 }
