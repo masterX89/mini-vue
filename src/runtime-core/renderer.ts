@@ -1,4 +1,4 @@
-import { isArray, isObject, isString } from '../shared'
+import { isArray, isObject, isString, ShapeFlags } from '../shared'
 import { createComponentInstance, setupComponent } from './component'
 
 export function render(vnode: any, rootContainer: any) {
@@ -6,12 +6,11 @@ export function render(vnode: any, rootContainer: any) {
   patch(vnode, rootContainer)
 }
 function patch(vnode: any, container: any) {
-  const { type } = vnode
-
-  if (isString(type)) {
+  const { type, shapeFlag } = vnode
+  if (shapeFlag & ShapeFlags.ELEMENT) {
     // isString -> processElement
     processElement(vnode, container)
-  } else if (isObject(type)) {
+  } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
     // isObj ->processComponent
     processComponent(vnode, container)
   }
@@ -28,7 +27,7 @@ function processElement(vnode: any, container: any) {
 // 3. children 是否为 string 或者 array
 // 4. 挂载 container.append
 function mountElement(vnode: any, container: any) {
-  const { type, props, children } = vnode
+  const { type, props, children, shapeFlag } = vnode
   // 这里的 vnode 是 tag, 通过 vnode.el 把 el 传递出来
   const el = (vnode.el = document.createElement(type))
 
@@ -39,9 +38,9 @@ function mountElement(vnode: any, container: any) {
     }
   }
 
-  if (isString(children)) {
+  if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
     el.innerText = children
-  } else if (isArray(children)) {
+  } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
     mountChildren(children, el)
   }
   container.append(el)
