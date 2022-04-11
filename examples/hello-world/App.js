@@ -15,6 +15,9 @@ export const App = {
       'div',
       {
         id: 'root',
+        onClick: () => {
+          alert('click!')
+        },
       },
       [
         h('p', { class: 'red' }, 'hello'),

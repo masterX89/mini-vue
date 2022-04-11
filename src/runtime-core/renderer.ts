@@ -1,4 +1,4 @@
-import { isArray, isObject, isString, ShapeFlags } from '../shared'
+import { isArray, isObject, isOn, isString, ShapeFlags } from '../shared'
 import { createComponentInstance, setupComponent } from './component'
 
 export function render(vnode: any, rootContainer: any) {
@@ -33,8 +33,13 @@ function mountElement(vnode: any, container: any) {
 
   if (props) {
     for (const key in props) {
-      el.setAttribute(key, props[key])
-      // TODO: event
+      const val = props[key]
+      if (isOn(key)) {
+        const event = key.substring(2).toLowerCase()
+        el.addEventListener(event, val)
+      } else {
+        el.setAttribute(key, val)
+      }
     }
   }
 
