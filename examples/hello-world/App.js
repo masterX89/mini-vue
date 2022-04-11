@@ -1,4 +1,5 @@
 import { h } from '../../lib/mini-vue.esm.js'
+import { Foo } from './Foo.js'
 
 // 测试代码
 window.self = null
@@ -27,6 +28,7 @@ export const App = {
         // this.$data
         // 上述通过 代理模式 统一交给用户
         h('p', { class: 'blue' }, this.msg),
+        h(Foo, { count: 1 }),
       ]
     )
   },

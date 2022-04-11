@@ -1,3 +1,6 @@
+import { shallowReadonly } from '../reactivity/reactive'
+import { isObject } from '../shared'
+import { initProps } from './componentProps'
 import { PublicInstanceProxyHandlers } from './componentPublicInstance'
 
 export function createComponentInstance(vnode: any) {
@@ -5,12 +8,16 @@ export function createComponentInstance(vnode: any) {
     vnode,
     type: vnode.type,
     setupState: {},
+    props: {},
   }
   return component
 }
 
 export function setupComponent(instance: any) {
-  // TODO: initProps
+  const { props } = instance.vnode
+  // 将 props 接收到 instance 中
+  // instance.vnode.props -> instance.props
+  initProps(instance, props)
   // TODO: initSlots
   setupStatefulComponent(instance)
   // TODO: 函数组件(无状态)
@@ -26,10 +33,11 @@ function setupStatefulComponent(instance: any) {
   // instance -> vnode -> type === component -> setupResult = setup()
   // instance: {vnode, type}
   // instance -> type === component -> setupResult = setup()
-  const Component = instance.type
+  const { props, type: Component } = instance
   const { setup } = Component
   if (setup) {
-    const setupResult = setup()
+    // setup 接收 props 参数
+    const setupResult = setup(shallowReadonly(props))
     handleSetupResult(instance, setupResult)
   }
 }
@@ -42,7 +50,9 @@ function handleSetupResult(instance, setupResult: any) {
 
   // TODO: object 响应式代理
   // instance.setupState = proxyRefs(setupResult)
-  instance.setupState = setupResult
+  if (isObject(setupResult)) {
+    instance.setupState = setupResult
+  }
 
   finishComponentSetup(instance)
 }
