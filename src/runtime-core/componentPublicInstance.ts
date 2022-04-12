@@ -21,5 +21,8 @@ export const PublicInstanceProxyHandlers = {
     if (publicGetter) {
       return publicGetter(instance)
     }
+    // TODO: 不在 setupState | props | $ 中，需要做处理
+    console.warn(`${key} is not in the component`)
+    return 'undefined'
   },
 }
