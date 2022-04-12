@@ -1,5 +1,6 @@
 import { shallowReadonly } from '../reactivity/reactive'
-import { isObject } from '../shared'
+import { isObject, NOOP } from '../shared'
+import { emit } from './componentEmit'
 import { initProps } from './componentProps'
 import { PublicInstanceProxyHandlers } from './componentPublicInstance'
 
@@ -9,7 +10,12 @@ export function createComponentInstance(vnode: any) {
     type: vnode.type,
     setupState: {},
     props: {},
+    emit: () => {},
   }
+  // bind 除了可以处理 this 丢失的问题
+  // 还可以隐藏参数
+  // XXX: as any 需要在 ts 的学习中解决
+  component.emit = emit.bind(null, component) as any
   return component
 }
 
@@ -37,7 +43,7 @@ function setupStatefulComponent(instance: any) {
   const { setup } = Component
   if (setup) {
     // setup 接收 props 参数
-    const setupResult = setup(shallowReadonly(props))
+    const setupResult = setup(shallowReadonly(props), { emit: instance.emit })
     handleSetupResult(instance, setupResult)
   }
 }

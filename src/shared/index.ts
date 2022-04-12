@@ -1,3 +1,4 @@
+export const NOOP = () => {}
 export const extend = Object.assign
 
 export const isObject = (val) => val !== null && typeof val === 'object'
@@ -29,3 +30,5 @@ export const enum ShapeFlags {
   COMPONENT_KEPT_ALIVE = 1 << 9,
   COMPONENT = ShapeFlags.STATEFUL_COMPONENT | ShapeFlags.FUNCTIONAL_COMPONENT,
 }
+
+export const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1)
