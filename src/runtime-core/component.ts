@@ -3,6 +3,7 @@ import { isObject, NOOP } from '../shared'
 import { emit } from './componentEmit'
 import { initProps } from './componentProps'
 import { PublicInstanceProxyHandlers } from './componentPublicInstance'
+import { initSlots } from './componentSlots'
 
 export function createComponentInstance(vnode: any) {
   const component = {
@@ -10,7 +11,8 @@ export function createComponentInstance(vnode: any) {
     type: vnode.type,
     setupState: {},
     props: {},
-    emit: () => {},
+    slots: {},
+    emit: NOOP,
   }
   // bind 除了可以处理 this 丢失的问题
   // 还可以隐藏参数
@@ -20,11 +22,11 @@ export function createComponentInstance(vnode: any) {
 }
 
 export function setupComponent(instance: any) {
-  const { props } = instance.vnode
+  const { props, children } = instance.vnode
   // 将 props 接收到 instance 中
   // instance.vnode.props -> instance.props
   initProps(instance, props)
-  // TODO: initSlots
+  initSlots(instance, children)
   setupStatefulComponent(instance)
   // TODO: 函数组件(无状态)
 }
