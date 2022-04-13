@@ -13,9 +13,16 @@ export default {
     // 粗暴解法1: 如果把 this.$slots 直接解构似乎也是可以的
     // return h('div', {}, [h('p', {}, 'Child Component'), ...this.$slots])
     // 粗暴解法2: 但是实际上需要一个 vnode 来接住 slots，即类似 h('div',{},this.$slots)
+    // return h('div', {}, [
+    //   h('p', {}, 'Child Component'),
+    //   renderSlot(this.$slots),
+    // ])
+
+    // case3: 具名插槽
     return h('div', {}, [
+      renderSlot(this.$slots, 'header'),
       h('p', {}, 'Child Component'),
-      renderSlot(this.$slots),
+      renderSlot(this.$slots, 'footer'),
     ])
   },
 }
