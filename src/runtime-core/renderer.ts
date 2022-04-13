@@ -1,4 +1,4 @@
-import { isArray, isObject, isOn, isString, ShapeFlags } from '../shared'
+import { isOn, ShapeFlags } from '../shared'
 import { createComponentInstance, setupComponent } from './component'
 
 export function render(vnode: any, rootContainer: any) {
@@ -7,6 +7,7 @@ export function render(vnode: any, rootContainer: any) {
 }
 function patch(vnode: any, container: any) {
   const { shapeFlag } = vnode
+  // TODO: vnode 不合法就没有出口了
   if (shapeFlag & ShapeFlags.ELEMENT) {
     // isString -> processElement
     processElement(vnode, container)
