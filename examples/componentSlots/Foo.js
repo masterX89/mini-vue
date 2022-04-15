@@ -19,8 +19,15 @@ export default {
     // ])
 
     // case3: 具名插槽
+    // return h('div', {}, [
+    //   renderSlot(this.$slots, 'header'),
+    //   h('p', {}, 'Child Component'),
+    //   renderSlot(this.$slots, 'footer'),
+    // ])
+    // case4: 作用域插槽
+
     return h('div', {}, [
-      renderSlot(this.$slots, 'header'),
+      renderSlot(this.$slots, 'header', { num_1: 1, num_2: 2 }),
       h('p', {}, 'Child Component'),
       renderSlot(this.$slots, 'footer'),
     ])

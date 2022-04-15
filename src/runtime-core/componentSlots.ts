@@ -8,7 +8,8 @@ export function initSlots(instance, children) {
 function normalizeObjectSlots(children: any, slots: any) {
   for (const key in children) {
     const value = children[key]
-    slots[key] = normalizeSlotValue(value)
+    // value 或者说 slot 此时是一个 function
+    slots[key] = (props) => normalizeSlotValue(value(props))
   }
 }
 

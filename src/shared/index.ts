@@ -2,6 +2,7 @@ export const NOOP = () => {}
 export const extend = Object.assign
 
 export const isObject = (val) => val !== null && typeof val === 'object'
+export const isFunction = (val) => typeof val === 'function'
 export const isString = (val) => typeof val === 'string'
 export const isArray = (val) => Array.isArray(val)
 export const isOn = (val) => /^on[A-Z]/.test(val)

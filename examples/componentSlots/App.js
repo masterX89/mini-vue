@@ -20,12 +20,22 @@ export default {
     // foo = {
     //   default: [h('p', {}, 'element-01'), h('p', {}, 'element-02')],
     // }
+    // foo = {
+    //   header: [h('p', {}, 'element-01'), h('p', {}, 'element-02')],
+    //   footer: h('p', {}, 'this is footer'),
+    // }
 
+    // case4: 作用域插槽
+    // slots 依旧是 obj
+    // slot 从 array 变成了 返回 array 的 function
+    // slot() 后才会得到对应的 array
     foo = {
-      header: [h('p', {}, 'element-01'), h('p', {}, 'element-02')],
-      footer: h('p', {}, 'this is footer'),
+      header: ({ num_1, num_2 }) => [
+        h('p', {}, 'element-' + num_1),
+        h('p', {}, 'element-' + num_2),
+      ],
+      footer: () => h('p', {}, 'this is footer'),
     }
-
     return h('div', {}, [h('div', {}, 'Parent Component'), h(Foo, {}, foo)])
   },
 }
