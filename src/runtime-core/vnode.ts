@@ -7,9 +7,20 @@ export function createVNode(type, props?, children?) {
     children,
     shapeFlag: getShapeFlag(type),
   }
-  vnode.shapeFlag |= isString(children)
-    ? ShapeFlags.TEXT_CHILDREN
-    : ShapeFlags.ARRAY_CHILDREN
+
+  if (isString(children)) {
+    vnode.shapeFlag |= ShapeFlags.TEXT_CHILDREN
+  } else if (Array(children)) {
+    vnode.shapeFlag |= ShapeFlags.ARRAY_CHILDREN
+  }
+
+  // 如何判断是一个 slots
+  // vnode是一个组件 且 children 是 object
+  if (vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+    if (isObject(vnode.children)) {
+      vnode.shapeFlag |= ShapeFlags.SLOTS_CHILDREN
+    }
+  }
   return vnode
 }
 function getShapeFlag(type: any) {

@@ -1,8 +1,12 @@
-import { isArray } from '../shared'
+import { isArray, ShapeFlags } from '../shared'
 
 export function initSlots(instance, children) {
-  // children 是一个 object
-  normalizeObjectSlots(children, instance.slots)
+  // 判断 children 是否是一个 object
+  // 判断任务加入到 shapeFlags 中
+  const { vnode } = instance
+  if (vnode.shapeFlag & ShapeFlags.SLOTS_CHILDREN) {
+    normalizeObjectSlots(children, instance.slots)
+  }
 }
 
 function normalizeObjectSlots(children: any, slots: any) {
