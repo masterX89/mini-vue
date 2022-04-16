@@ -1,5 +1,5 @@
 import { isFunction } from '../../shared'
-import { createVNode } from '../vnode'
+import { createVNode, Fragment } from '../vnode'
 
 export function renderSlot(slots, name = 'default', props) {
   // TODO: default 具名
@@ -8,7 +8,7 @@ export function renderSlot(slots, name = 'default', props) {
     // slot: (props) => h(el, {}, props)
     if (isFunction(slot)) {
       // 需要使用 Fragment
-      return createVNode('Fragment', {}, slot(props))
+      return createVNode(Fragment, {}, slot(props))
     }
   }
 }

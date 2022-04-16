@@ -1,5 +1,6 @@
 import { isOn, ShapeFlags } from '../shared'
 import { createComponentInstance, setupComponent } from './component'
+import { Fragment } from './vnode'
 
 export function render(vnode: any, rootContainer: any) {
   // patch 递归
@@ -9,7 +10,7 @@ function patch(vnode: any, container: any) {
   const { type, shapeFlag } = vnode
 
   switch (type) {
-    case 'Fragment':
+    case Fragment:
       processFragment(vnode, container)
       break
     default:
