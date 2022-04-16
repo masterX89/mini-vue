@@ -6,14 +6,22 @@ export function render(vnode: any, rootContainer: any) {
   patch(vnode, rootContainer)
 }
 function patch(vnode: any, container: any) {
-  const { shapeFlag } = vnode
-  // TODO: vnode 不合法就没有出口了
-  if (shapeFlag & ShapeFlags.ELEMENT) {
-    // isString -> processElement
-    processElement(vnode, container)
-  } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-    // isObj ->processComponent
-    processComponent(vnode, container)
+  const { type, shapeFlag } = vnode
+
+  switch (type) {
+    case 'Fragment':
+      processFragment(vnode, container)
+      break
+    default:
+      // TODO: vnode 不合法就没有出口了
+      if (shapeFlag & ShapeFlags.ELEMENT) {
+        // isString -> processElement
+        processElement(vnode, container)
+      } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+        // isObj ->processComponent
+        processComponent(vnode, container)
+      }
+      break
   }
 }
 
@@ -87,4 +95,8 @@ function setupRenderEffect(instance, initialVNode, container) {
   // 而这个方法里的 vnode 是一个 componentInstance
   // vnode.el = subTree.el 将 el 传递给了 component
   initialVNode.el = subTree.el
+}
+function processFragment(vnode: any, container: any) {
+  const { children } = vnode
+  mountChildren(children, container)
 }

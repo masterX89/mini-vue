@@ -7,7 +7,8 @@ export function renderSlot(slots, name = 'default', props) {
   if (slot) {
     // slot: (props) => h(el, {}, props)
     if (isFunction(slot)) {
-      return createVNode('div', {}, slot(props))
+      // 需要使用 Fragment
+      return createVNode('Fragment', {}, slot(props))
     }
   }
 }
