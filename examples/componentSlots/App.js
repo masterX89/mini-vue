@@ -1,4 +1,4 @@
-import { h } from '../../lib/mini-vue.esm.js'
+import { h, createTextVNode } from '../../lib/mini-vue.esm.js'
 import Foo from './Foo.js'
 
 export default {
@@ -34,7 +34,10 @@ export default {
         h('p', {}, 'element-' + num_1),
         h('p', {}, 'element-' + num_2),
       ],
-      footer: () => h('p', {}, 'this is footer'),
+      footer: () => [
+        h('p', {}, 'this is footer'),
+        createTextVNode(' And a TextNode'),
+      ],
     }
     return h('div', {}, [h('div', {}, 'Parent Component'), h(Foo, {}, foo)])
   },

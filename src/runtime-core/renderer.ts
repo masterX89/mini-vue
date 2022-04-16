@@ -1,6 +1,6 @@
 import { isOn, ShapeFlags } from '../shared'
 import { createComponentInstance, setupComponent } from './component'
-import { Fragment } from './vnode'
+import { Fragment, Text } from './vnode'
 
 export function render(vnode: any, rootContainer: any) {
   // patch 递归
@@ -12,6 +12,9 @@ function patch(vnode: any, container: any) {
   switch (type) {
     case Fragment:
       processFragment(vnode, container)
+      break
+    case Text:
+      processText(vnode, container)
       break
     default:
       // TODO: vnode 不合法就没有出口了
@@ -97,7 +100,14 @@ function setupRenderEffect(instance, initialVNode, container) {
   // vnode.el = subTree.el 将 el 传递给了 component
   initialVNode.el = subTree.el
 }
+
 function processFragment(vnode: any, container: any) {
   const { children } = vnode
   mountChildren(children, container)
+}
+
+function processText(vnode: any, container: any) {
+  const { children } = vnode
+  const el = (vnode.el = document.createTextNode(children))
+  container.append(el)
 }
