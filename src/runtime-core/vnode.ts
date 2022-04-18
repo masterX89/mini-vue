@@ -1,4 +1,4 @@
-import { isObject, isString, ShapeFlags } from '../shared'
+import { isArray, isObject, isString, ShapeFlags } from '../shared'
 export const Fragment = Symbol('Fragment')
 export const Text = Symbol('Text')
 export function createVNode(type, props?, children?) {
@@ -11,7 +11,7 @@ export function createVNode(type, props?, children?) {
 
   if (isString(children)) {
     vnode.shapeFlag |= ShapeFlags.TEXT_CHILDREN
-  } else if (Array(children)) {
+  } else if (isArray(children)) {
     vnode.shapeFlag |= ShapeFlags.ARRAY_CHILDREN
   }
 
