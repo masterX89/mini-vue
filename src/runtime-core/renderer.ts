@@ -6,6 +6,7 @@ export function render(vnode: any, rootContainer: any) {
   // patch 递归
   patch(vnode, rootContainer, null)
 }
+
 function patch(vnode: any, container: any, parentComponent) {
   const { type, shapeFlag } = vnode
 
@@ -27,6 +28,17 @@ function patch(vnode: any, container: any, parentComponent) {
       }
       break
   }
+}
+
+function processFragment(vnode: any, container: any, parentComponent) {
+  const { children } = vnode
+  mountChildren(children, container, parentComponent)
+}
+
+function processText(vnode: any, container: any) {
+  const { children } = vnode
+  const el = (vnode.el = document.createTextNode(children))
+  container.append(el)
 }
 
 function processElement(vnode: any, container: any, parentComponent) {
@@ -99,15 +111,4 @@ function setupRenderEffect(instance, initialVNode, container) {
   // 而这个方法里的 vnode 是一个 componentInstance
   // vnode.el = subTree.el 将 el 传递给了 component
   initialVNode.el = subTree.el
-}
-
-function processFragment(vnode: any, container: any, parentComponent) {
-  const { children } = vnode
-  mountChildren(children, container, parentComponent)
-}
-
-function processText(vnode: any, container: any) {
-  const { children } = vnode
-  const el = (vnode.el = document.createTextNode(children))
-  container.append(el)
 }
