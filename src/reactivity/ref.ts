@@ -56,9 +56,21 @@ export function isRef(ref) {
 }
 
 export function unRef(ref) {
-  return isRef(ref) ? ref._value : ref
+  // unRef 主要就是为了暴露给 proxyRefs 使用的
+  // 读取到值的内容的时候，会触发 unRef
+  // 而 unRef 里应该触发 .value 而不是 ._value
+  // 否则不能触发依赖收集
+  return isRef(ref) ? ref.value : ref
 }
 
+// proxyRefs 用于包装一个 obj(一般为 setupResult)
+// setupResult 可能为这种形式
+// {
+//   ref(原始值)
+//   reactive(obj) 写个测试用例测试一下
+//   function
+//   原始值
+// }
 export function proxyRefs(objectWithRefs) {
   // TODO: proxyRefs handler
   return new Proxy(objectWithRefs, {

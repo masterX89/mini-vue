@@ -101,4 +101,37 @@ describe('ref', () => {
     expect(newObj.foo).toBe(10)
     expect(obj.foo.value).toBe(10)
   })
+
+  it('proxyRefs reactive', () => {
+    const foo = ref(0)
+    const addFoo = () => {
+      foo.value++
+    }
+    const barObj = reactive({ num: 0 })
+    const addBar = () => {
+      barObj.num++
+    }
+    // setupResult
+    const obj = {
+      foo,
+      addFoo,
+      barObj,
+      addBar,
+    }
+    // handleSetupResult
+    const newObj = proxyRefs(obj)
+
+    let count = 0
+    effect(() => {
+      // render
+      newObj.foo
+      newObj.barObj.num
+      count++
+    })
+    expect(count).toBe(1)
+    newObj.addFoo()
+    expect(count).toBe(2)
+    newObj.addBar()
+    expect(count).toBe(3)
+  })
 })
