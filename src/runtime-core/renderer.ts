@@ -1,4 +1,4 @@
-import { isOn, ShapeFlags } from '../shared'
+import { ShapeFlags } from '../shared'
 import { createComponentInstance, setupComponent } from './component'
 import { createAppAPI } from './createApp'
 import { Fragment, Text } from './vnode'
@@ -45,6 +45,7 @@ export function createRenderer(options) {
 
   function processText(vnode: any, container: any) {
     const { children } = vnode
+    // TODO: 这里使用了 DOM 平台，需要抽离逻辑
     const el = (vnode.el = document.createTextNode(children))
     container.append(el)
   }
