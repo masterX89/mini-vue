@@ -1,4 +1,5 @@
 import { shallowReadonly } from '../reactivity/reactive'
+import { proxyRefs } from '../reactivity/ref'
 import { isObject, NOOP } from '../shared'
 import { emit } from './componentEmit'
 import { initProps } from './componentProps'
@@ -14,6 +15,8 @@ export function createComponentInstance(vnode: any, parent: any) {
     slots: {},
     provides: parent ? parent.provides : {},
     parent,
+    isMounted: false,
+    subTree: {},
     emit: NOOP,
   }
   // bind 除了可以处理 this 丢失的问题
@@ -60,10 +63,9 @@ function setupStatefulComponent(instance: any) {
 function handleSetupResult(instance, setupResult: any) {
   // TODO: function
 
-  // TODO: object 响应式代理
-  // instance.setupState = proxyRefs(setupResult)
   if (isObject(setupResult)) {
-    instance.setupState = setupResult
+    // render 中要拿到自动脱 ref 所以使用 proxyRefs 包装 setupResult 的内容
+    instance.setupState = proxyRefs(setupResult)
   }
 
   finishComponentSetup(instance)

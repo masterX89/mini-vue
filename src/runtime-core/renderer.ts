@@ -1,3 +1,4 @@
+import { effect } from '../reactivity/effect'
 import { ShapeFlags } from '../shared'
 import { createComponentInstance, setupComponent } from './component'
 import { createAppAPI } from './createApp'
@@ -12,48 +13,51 @@ export function createRenderer(options) {
 
   function render(vnode: any, rootContainer: any) {
     // patch 递归
-    patch(vnode, rootContainer, null)
+    patch(null, vnode, rootContainer, null)
   }
 
-  function patch(vnode: any, container: any, parentComponent) {
-    const { type, shapeFlag } = vnode
+  function patch(n1, n2: any, container: any, parentComponent) {
+    const { type, shapeFlag } = n2
 
     switch (type) {
       case Fragment:
-        processFragment(vnode, container, parentComponent)
+        processFragment(n1, n2, container, parentComponent)
         break
       case Text:
-        processText(vnode, container)
+        processText(n1, n2, container)
         break
       default:
         // TODO: vnode 不合法就没有出口了
         if (shapeFlag & ShapeFlags.ELEMENT) {
           // isString -> processElement
-          processElement(vnode, container, parentComponent)
+          processElement(n1, n2, container, parentComponent)
         } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
           // isObj ->processComponent
-          processComponent(vnode, container, parentComponent)
+          processComponent(n1, n2, container, parentComponent)
         }
         break
     }
   }
 
-  function processFragment(vnode: any, container: any, parentComponent) {
-    const { children } = vnode
+  function processFragment(n1, n2: any, container: any, parentComponent) {
+    const { children } = n2
     mountChildren(children, container, parentComponent)
   }
 
-  function processText(vnode: any, container: any) {
-    const { children } = vnode
+  function processText(n1, n2: any, container: any) {
+    const { children } = n2
     // TODO: 这里使用了 DOM 平台，需要抽离逻辑
-    const el = (vnode.el = document.createTextNode(children))
+    const el = (n2.el = document.createTextNode(children))
     container.append(el)
   }
 
-  function processElement(vnode: any, container: any, parentComponent) {
+  function processElement(n1, n2: any, container: any, parentComponent) {
     // 判断是 mount 还是 update
-    mountElement(vnode, container, parentComponent)
-    // TODO: updateElement
+    if (!n1) {
+      mountElement(n2, container, parentComponent)
+    } else {
+      patchElement(n1, n2, container)
+    }
   }
 
   // 1. 创建 type === tag 的 el
@@ -82,13 +86,22 @@ export function createRenderer(options) {
 
   function mountChildren(children, container, parentComponent) {
     children.forEach((child) => {
-      patch(child, container, parentComponent)
+      patch(null, child, container, parentComponent)
     })
   }
 
-  function processComponent(vnode: any, container: any, parentComponent) {
+  function patchElement(n1, n2, container) {
+    // TODO: patchElement
+    // props
+    // children
+    console.log('patchElement')
+    console.log('n1: ', n1)
+    console.log('n2: ', n2)
+  }
+
+  function processComponent(n1, n2: any, container: any, parentComponent) {
     // 判断是 mount 还是 update
-    mountComponent(vnode, container, parentComponent)
+    mountComponent(n2, container, parentComponent)
     // TODO: updateComponent
   }
 
@@ -105,16 +118,32 @@ export function createRenderer(options) {
   }
 
   function setupRenderEffect(instance, initialVNode, container) {
-    // setupState | $el | $data 的代理
-    const { proxy } = instance
-    // render 的 this 指向的是 proxy
-    // proxy 读取 setup 返回值的时通过 handler 处理掉了 setupState
-    const subTree = instance.render.call(proxy)
-    patch(subTree, container, instance)
-    // 递归结束, subTree 是 root element, 即最外层的 tag
-    // 而这个方法里的 vnode 是一个 componentInstance
-    // vnode.el = subTree.el 将 el 传递给了 component
-    initialVNode.el = subTree.el
+    effect(() => {
+      // mount 流程
+      if (!instance.isMounted) {
+        // setupState | $el | $data 的代理
+        const { proxy } = instance
+        // render 的 this 指向的是 proxy
+        // proxy 读取 setup 返回值的时通过 handler 处理掉了 setupState
+        const subTree = (instance.subTree = instance.render.call(proxy))
+        patch(null, subTree, container, instance)
+        // 递归结束, subTree 是 root element, 即最外层的 tag
+        // 而这个方法里的 vnode 是一个 componentInstance
+        // vnode.el = subTree.el 将 el 传递给了 component
+        initialVNode.el = subTree.el
+        // 更新 isMounted 状态
+        instance.isMounted = true
+      } else {
+        const { proxy } = instance
+        const subTree = instance.render.call(proxy)
+        const preSubTree = instance.subTree
+        // 更新 instance 的 subTree
+        instance.subTree = subTree
+        patch(preSubTree, subTree, container, instance)
+        // XXX: update 流程中 el 是否会被更新？
+        // initialVNode.el = subTree.el
+      }
+    })
   }
 
   return {
