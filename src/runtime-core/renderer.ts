@@ -72,7 +72,7 @@ export function createRenderer(options) {
     if (props) {
       for (const key in props) {
         const val = props[key]
-        hostPatchProp(el, key, val)
+        hostPatchProp(el, key, null, val)
       }
     }
 
@@ -112,13 +112,14 @@ export function createRenderer(options) {
         const prevProp = oldProps[key]
         const nextProp = newProps[key]
         if (nextProp !== prevProp) {
-          hostPatchProp(el, key, nextProp)
+          hostPatchProp(el, key, prevProp, nextProp)
         }
       }
       if (oldProps !== EMPTY_OBJ) {
         for (const key in oldProps) {
           if (!(key in newProps)) {
-            hostPatchProp(el, key, null)
+            const prevProp = oldProps[key]
+            hostPatchProp(el, key, prevProp, null)
           }
         }
       }

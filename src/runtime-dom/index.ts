@@ -5,14 +5,14 @@ function createElement(type) {
   return document.createElement(type)
 }
 
-function patchProp(el, key, val) {
+function patchProp(el, key, prevVal, nextVal) {
   if (isOn(key)) {
     const event = key.substring(2).toLowerCase()
-    el.addEventListener(event, val)
-  } else if (val === undefined || val === null) {
+    el.addEventListener(event, nextVal)
+  } else if (nextVal === undefined || nextVal === null) {
     el.removeAttribute(key)
   } else {
-    el.setAttribute(key, val)
+    el.setAttribute(key, nextVal)
   }
 }
 
