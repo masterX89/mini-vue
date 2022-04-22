@@ -1,5 +1,5 @@
 import { effect } from '../reactivity/effect'
-import { ShapeFlags } from '../shared'
+import { EMPTY_OBJ, ShapeFlags } from '../shared'
 import { createComponentInstance, setupComponent } from './component'
 import { createAppAPI } from './createApp'
 import { Fragment, Text } from './vnode'
@@ -91,12 +91,38 @@ export function createRenderer(options) {
   }
 
   function patchElement(n1, n2, container) {
+    const el = (n2.el = n1.el)
     // TODO: patchElement
-    // props
     // children
     console.log('patchElement')
     console.log('n1: ', n1)
     console.log('n2: ', n2)
+    // props
+    const oldProps = n1.props || EMPTY_OBJ
+    const newProps = n2.props || EMPTY_OBJ
+    patchProps(el, oldProps, newProps)
+  }
+
+  function patchProps(el, oldProps, newProps) {
+    // TODO: 关注 #5773 结果, 这个判断涉及到一个性能平衡点
+    // 如果使用 hasPropsChanged 在 element 的 props 没有更新的情况下会节省一次循环
+    // 但是同时会导致 props 更新的情况下多出一次循环
+    if (oldProps !== newProps) {
+      for (const key in newProps) {
+        const prevProp = oldProps[key]
+        const nextProp = newProps[key]
+        if (nextProp !== prevProp) {
+          hostPatchProp(el, key, nextProp)
+        }
+      }
+      if (oldProps !== EMPTY_OBJ) {
+        for (const key in oldProps) {
+          if (!(key in newProps)) {
+            hostPatchProp(el, key, null)
+          }
+        }
+      }
+    }
   }
 
   function processComponent(n1, n2: any, container: any, parentComponent) {

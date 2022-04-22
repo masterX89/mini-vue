@@ -9,6 +9,8 @@ function patchProp(el, key, val) {
   if (isOn(key)) {
     const event = key.substring(2).toLowerCase()
     el.addEventListener(event, val)
+  } else if (val === undefined || val === null) {
+    el.removeAttribute(key)
   } else {
     el.setAttribute(key, val)
   }
