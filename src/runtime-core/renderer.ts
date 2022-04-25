@@ -9,6 +9,8 @@ export function createRenderer(options) {
     createElement: hostCreateElement,
     patchProp: hostPatchProp,
     insert: hostInsert,
+    remove: hostRemove,
+    setElementText: hostSetElementText,
   } = options
 
   function render(vnode: any, rootContainer: any) {
@@ -56,7 +58,7 @@ export function createRenderer(options) {
     if (!n1) {
       mountElement(n2, container, parentComponent)
     } else {
-      patchElement(n1, n2, container)
+      patchElement(n1, n2, container, parentComponent)
     }
   }
 
@@ -90,17 +92,60 @@ export function createRenderer(options) {
     })
   }
 
-  function patchElement(n1, n2, container) {
+  function patchElement(n1, n2, container, parentComponent) {
     const el = (n2.el = n1.el)
-    // TODO: patchElement
-    // children
     console.log('patchElement')
     console.log('n1: ', n1)
     console.log('n2: ', n2)
+    // children
+    // 注意这里传入的是 el 而不是 container
+    // container 是整个容器
+    // 此时更新的仅仅是需要更新节点的 el
+    patchChildren(n1, n2, el, parentComponent)
     // props
     const oldProps = n1.props || EMPTY_OBJ
     const newProps = n2.props || EMPTY_OBJ
     patchProps(el, oldProps, newProps)
+  }
+
+  // 此处的 container 是需要更新的容器 即 n1 n2 的 el
+  function patchChildren(n1, n2, container, parentComponent) {
+    const { shapeFlag: prevShapeFlag, children: c1 } = n1
+    const { shapeFlag, children: c2 } = n2
+    if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
+      if (prevShapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+        // remove all children
+        unmountChildren(c1)
+      }
+      if (c1 !== c2) {
+        // (ArrayToText | TextToText) -> insert text element
+        hostSetElementText(container, c2)
+      }
+    } else {
+      if (prevShapeFlag & ShapeFlags.TEXT_CHILDREN) {
+        // TextToArray
+        // 清空 textContent
+        hostSetElementText(container, null)
+        // mountChildren
+        mountChildren(c2, container, parentComponent)
+      } else {
+        // ArrayToArray
+        unmountChildren(c1)
+        mountChildren(c2, container, parentComponent)
+      }
+    }
+  }
+
+  function unmountChildren(children) {
+    // XXX: 这里为什么用 for 而不是 forEach
+    // 并且vue3源码中的remove是把parentComponent也传递了过去
+    // 按理来说传递后就不需要使用 Node.parentNode 来找 parent 了
+    // 多次找 parentNode 也是一个消耗因为可能是同一个
+    for (let i = 0; i < children.length; i++) {
+      // 注意这里需要传入 el
+      // children[i] 只是一个 vnode
+      hostRemove(children[i].el)
+    }
   }
 
   function patchProps(el, oldProps, newProps) {

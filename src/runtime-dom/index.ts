@@ -20,10 +20,24 @@ function insert(el, container) {
   container.append(el)
 }
 
+function remove(el) {
+  const parentNode = el.parentNode
+  if (parentNode) {
+    parentNode.removeChild(el)
+  }
+}
+
+function setElementText(container, children) {
+  // XXX: textContent v. innerText
+  container.textContent = children
+}
+
 const renderer: any = createRenderer({
   createElement,
   patchProp,
   insert,
+  remove,
+  setElementText,
 })
 
 export function createApp(...args) {
