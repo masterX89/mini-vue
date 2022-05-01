@@ -425,6 +425,8 @@ export function createRenderer(options) {
   }
 }
 
+// 注意 arrI 的 edge case:
+// [2,0,1,3,4,5] 的 LIS index 是 [2,3,4,5]
 function getSequence(arr: number[]): number[] {
   const p = arr.slice()
   const result = [0]
