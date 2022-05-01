@@ -1,6 +1,7 @@
 export const NOOP = () => {}
 export const extend = Object.assign
 export const EMPTY_OBJ = {}
+export const EMPTY_ARR = []
 
 export const isObject = (val) => val !== null && typeof val === 'object'
 export const isFunction = (val) => typeof val === 'function'
