@@ -307,11 +307,11 @@ export function createRenderer(options) {
             // j < 0: LIS处理结束剩下的均为需要移动的节点
             // i !== increasingNewIndexSequence[j]: 不在 LIS 中需要移动
             hostInsert(nextChild.el, container, anchor)
+          } else {
+            // 不是新增的节点也无需移动
+            // LIS 的索引向前移动
+            j--
           }
-        } else {
-          // 不是新增的节点也无需移动
-          // LIS 的索引向前移动
-          j--
         }
       }
     }
