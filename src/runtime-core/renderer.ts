@@ -359,9 +359,16 @@ export function createRenderer(options) {
     parentComponent,
     anchor
   ) {
-    // 判断是 mount 还是 update
-    mountComponent(n2, container, parentComponent, anchor)
-    // TODO: updateComponent
+    if (!n1) {
+      mountComponent(n2, container, parentComponent, anchor)
+    } else {
+      updateComponent(n1, n2)
+    }
+  }
+
+  function updateComponent(n1, n2) {
+    const instance = (n2.component = n1.component)
+    instance.update()
   }
 
   function mountComponent(
@@ -373,7 +380,10 @@ export function createRenderer(options) {
     // 1. 创建 componentInstance
     // 数据类型: vnode -> component
     // component: {vnode, type}
-    const instance = createComponentInstance(initialVNode, parentComponent)
+    const instance = (initialVNode.component = createComponentInstance(
+      initialVNode,
+      parentComponent
+    ))
     // 2. setupComponent(instance)
     setupComponent(instance)
     // 3. setupRenderEffect(instance)
@@ -382,7 +392,7 @@ export function createRenderer(options) {
   }
 
   function setupRenderEffect(instance, initialVNode, container, anchor) {
-    effect(() => {
+    instance.update = effect(() => {
       // mount 流程
       if (!instance.isMounted) {
         // setupState | $el | $data 的代理

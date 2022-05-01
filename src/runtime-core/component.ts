@@ -17,7 +17,8 @@ export function createComponentInstance(vnode: any, parent: any) {
     parent,
     isMounted: false,
     subTree: {},
-    emit: NOOP,
+    emit: null,
+    update: null,
   }
   // bind 除了可以处理 this 丢失的问题
   // 还可以隐藏参数
