@@ -368,6 +368,8 @@ export function createRenderer(options) {
 
   function updateComponent(n1, n2) {
     const instance = (n2.component = n1.component)
+    // 将 n2 传递给 instance
+    instance.next = n2
     instance.update()
   }
 
@@ -408,7 +410,14 @@ export function createRenderer(options) {
         // 更新 isMounted 状态
         instance.isMounted = true
       } else {
-        const { proxy } = instance
+        const { proxy, vnode, next } = instance
+        // updateComponent 的逻辑
+        // vnode: n1, next: n2
+        if (next) {
+          // updateComponent 的 el 传递
+          next.el = vnode.el
+          updateComponentPreRender(instance, next)
+        }
         const subTree = instance.render.call(proxy)
         const preSubTree = instance.subTree
         // 更新 instance 的 subTree
@@ -416,8 +425,19 @@ export function createRenderer(options) {
         patch(preSubTree, subTree, container, instance, anchor)
         // update 流程中 el 是否会被更新？
         // 答案是会的, 在 patchElement 第一步就是 el = n2.el = n1.el
+        // 但是注意这里是 element 更新逻辑里的 el
+        // 而 Component 的 el 更新逻辑在上面的那个 if 判断里
+        // 感觉这里写的不是很好 二者没有归一起来
       }
     })
+  }
+
+  function updateComponentPreRender(instance, nextVNode) {
+    // 传递  props
+    instance.props = nextVNode.props
+    // 更新 instance 中的 vnode
+    instance.vnode = nextVNode
+    nextVNode = null
   }
 
   return {
