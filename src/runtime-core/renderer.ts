@@ -1,6 +1,7 @@
 import { effect } from '../reactivity/effect'
 import { EMPTY_ARR, EMPTY_OBJ, ShapeFlags } from '../shared'
 import { createComponentInstance, setupComponent } from './component'
+import { hasPropsChanged } from './componentRenderUtils'
 import { createAppAPI } from './createApp'
 import { Fragment, isSameVNodeType, Text } from './vnode'
 
@@ -369,8 +370,13 @@ export function createRenderer(options) {
   function updateComponent(n1, n2) {
     const instance = (n2.component = n1.component)
     // 将 n2 传递给 instance
-    instance.next = n2
-    instance.update()
+    if (hasPropsChanged(n1.props, n2.props)) {
+      instance.next = n2
+      instance.update()
+    } else {
+      n2.el = n1.el
+      instance.vnode = n2
+    }
   }
 
   function mountComponent(
