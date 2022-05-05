@@ -3,6 +3,7 @@ import { EMPTY_ARR, EMPTY_OBJ, ShapeFlags } from '../shared'
 import { createComponentInstance, setupComponent } from './component'
 import { hasPropsChanged } from './componentRenderUtils'
 import { createAppAPI } from './createApp'
+import { queueJobs } from './scheduler'
 import { Fragment, isSameVNodeType, Text } from './vnode'
 
 export function createRenderer(options) {
@@ -400,42 +401,49 @@ export function createRenderer(options) {
   }
 
   function setupRenderEffect(instance, initialVNode, container, anchor) {
-    instance.update = effect(() => {
-      // mount 流程
-      if (!instance.isMounted) {
-        // setupState | $el | $data 的代理
-        const { proxy } = instance
-        // render 的 this 指向的是 proxy
-        // proxy 读取 setup 返回值的时通过 handler 处理掉了 setupState
-        const subTree = (instance.subTree = instance.render.call(proxy))
-        patch(null, subTree, container, instance, anchor)
-        // 递归结束, subTree 是 root element, 即最外层的 tag
-        // 而这个方法里的 vnode 是一个 componentInstance
-        // vnode.el = subTree.el 将 el 传递给了 component
-        initialVNode.el = subTree.el
-        // 更新 isMounted 状态
-        instance.isMounted = true
-      } else {
-        const { proxy, vnode, next } = instance
-        // updateComponent 的逻辑
-        // vnode: n1, next: n2
-        if (next) {
-          // updateComponent 的 el 传递
-          next.el = vnode.el
-          updateComponentPreRender(instance, next)
+    instance.update = effect(
+      () => {
+        // mount 流程
+        if (!instance.isMounted) {
+          // setupState | $el | $data 的代理
+          const { proxy } = instance
+          // render 的 this 指向的是 proxy
+          // proxy 读取 setup 返回值的时通过 handler 处理掉了 setupState
+          const subTree = (instance.subTree = instance.render.call(proxy))
+          patch(null, subTree, container, instance, anchor)
+          // 递归结束, subTree 是 root element, 即最外层的 tag
+          // 而这个方法里的 vnode 是一个 componentInstance
+          // vnode.el = subTree.el 将 el 传递给了 component
+          initialVNode.el = subTree.el
+          // 更新 isMounted 状态
+          instance.isMounted = true
+        } else {
+          const { proxy, vnode, next } = instance
+          // updateComponent 的逻辑
+          // vnode: n1, next: n2
+          if (next) {
+            // updateComponent 的 el 传递
+            next.el = vnode.el
+            updateComponentPreRender(instance, next)
+          }
+          const subTree = instance.render.call(proxy)
+          const preSubTree = instance.subTree
+          // 更新 instance 的 subTree
+          instance.subTree = subTree
+          patch(preSubTree, subTree, container, instance, anchor)
+          // update 流程中 el 是否会被更新？
+          // 答案是会的, 在 patchElement 第一步就是 el = n2.el = n1.el
+          // 但是注意这里是 element 更新逻辑里的 el
+          // 而 Component 的 el 更新逻辑在上面的那个 if 判断里
+          // 感觉这里写的不是很好 二者没有归一起来
         }
-        const subTree = instance.render.call(proxy)
-        const preSubTree = instance.subTree
-        // 更新 instance 的 subTree
-        instance.subTree = subTree
-        patch(preSubTree, subTree, container, instance, anchor)
-        // update 流程中 el 是否会被更新？
-        // 答案是会的, 在 patchElement 第一步就是 el = n2.el = n1.el
-        // 但是注意这里是 element 更新逻辑里的 el
-        // 而 Component 的 el 更新逻辑在上面的那个 if 判断里
-        // 感觉这里写的不是很好 二者没有归一起来
+      },
+      {
+        scheduler() {
+          queueJobs(instance.update)
+        },
       }
-    })
+    )
   }
 
   function updateComponentPreRender(instance, nextVNode) {
