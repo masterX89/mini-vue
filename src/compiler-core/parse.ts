@@ -1,6 +1,11 @@
 import { extend } from '../shared'
 import { NodeTypes } from './ast'
 
+const enum TagType {
+  Start,
+  End,
+}
+
 export function baseParse(content: string, options = {}) {
   // 将 content 包装至 ctx 中
   const context = createParserContext(content, options)
@@ -10,12 +15,37 @@ export function baseParse(content: string, options = {}) {
 function parseChildren(context) {
   const nodes: any = []
   let node
-  const openDelimiter = context.options.delimiters[0]
-  if (context.source.startsWith(openDelimiter)) {
+  const s = context.source
+  if (s.startsWith(context.options.delimiters[0])) {
     node = parseInterpolation(context)
+  } else if (s[0] === '<') {
+    // TODO: 判断条件 startsWith 和 s[0] 的区别是什么
+    if (/[a-z]/i.test(s[1])) {
+      node = parseElement(context)
+    }
   }
   nodes.push(node)
   return nodes
+}
+
+function parseElement(context: any): any {
+  // StartTag
+  const element = parseTag(context, TagType.Start)
+  // EndTag
+  parseTag(context, TagType.End)
+  return element
+}
+
+function parseTag(context, type: TagType): any {
+  const match: any = /^<\/?([a-z]*)/i.exec(context.source)
+  const tag = match[1]
+  advanceBy(context, match[0].length + 1)
+  if (type === TagType.End) return
+
+  return {
+    type: NodeTypes.ELEMENT,
+    tag: tag,
+  }
 }
 
 function parseInterpolation(context) {
