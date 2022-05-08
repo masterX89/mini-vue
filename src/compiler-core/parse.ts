@@ -9,30 +9,55 @@ const enum TagType {
 export function baseParse(content: string, options = {}) {
   // 将 content 包装至 ctx 中
   const context = createParserContext(content, options)
-  return createRoot(parseChildren(context))
+  return createRoot(parseChildren(context, ''))
 }
 
-function parseChildren(context) {
+function parseChildren(context, parentTag) {
   const nodes: any = []
-  let node
-  const s = context.source
-  if (s.startsWith(context.options.delimiters[0])) {
-    node = parseInterpolation(context)
-  } else if (s[0] === '<') {
-    // TODO: 判断条件 startsWith 和 s[0] 的区别是什么
-    if (/[a-z]/i.test(s[1])) {
-      node = parseElement(context)
+  // parseChildren 应该使用循环来处理
+  while (!isEnd(context, parentTag)) {
+    const s = context.source
+    let node
+    if (s.startsWith(context.options.delimiters[0])) {
+      node = parseInterpolation(context)
+    } else if (s[0] === '<') {
+      // TODO: 判断条件 startsWith 和 s[0] 的区别是什么
+      if (/[a-z]/i.test(s[1])) {
+        node = parseElement(context)
+      }
     }
+    if (!node) {
+      node = parseText(context)
+    }
+    nodes.push(node)
   }
-  if (!node) {
-    node = parseText(context)
-  }
-  nodes.push(node)
+
   return nodes
 }
 
+function isEnd(context: any, parentTag) {
+  // TODO: 更换标签
+  // 结束标签
+  if (parentTag && context.source.startsWith(`</${parentTag}>`)) {
+    return true
+  }
+  // context.source 为空
+  return !context.source
+}
+
 function parseText(context: any): any {
-  const content = parseTextData(context, context.source.length)
+  // TODO: < 也应该作为 endToken
+  // 这里将从头至尾截取了所有内容
+  // 先将 {{ 作为 endToken 通过 happy case
+  let endTokens = ['<', context.options.delimiters[0]]
+  let endIndex = context.source.length
+  for (let i = 0; i < endTokens.length; i++) {
+    const index = context.source.indexOf(endTokens[i])
+    if (index !== -1) {
+      endIndex = index
+    }
+  }
+  const content = parseTextData(context, endIndex)
   return {
     type: NodeTypes.TEXT,
     content,
@@ -48,6 +73,9 @@ function parseTextData(context: any, length: number): any {
 function parseElement(context: any): any {
   // StartTag
   const element = parseTag(context, TagType.Start)
+  // parseEl 的时候应该也要 递归 parseChildren
+  // 否则就变成只解析一个 tag 了
+  element.children = parseChildren(context, element.tag)
   // EndTag
   parseTag(context, TagType.End)
   return element
@@ -61,7 +89,7 @@ function parseTag(context, type: TagType): any {
 
   return {
     type: NodeTypes.ELEMENT,
-    tag: tag,
+    tag,
   }
 }
 
