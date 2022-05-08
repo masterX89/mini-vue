@@ -36,7 +36,6 @@ function parseChildren(context, parentTag) {
 }
 
 function isEnd(context: any, parentTag) {
-  // TODO: 更换标签
   // 结束标签
   if (parentTag && context.source.startsWith(`</${parentTag}>`)) {
     return true
@@ -46,14 +45,12 @@ function isEnd(context: any, parentTag) {
 }
 
 function parseText(context: any): any {
-  // TODO: < 也应该作为 endToken
-  // 这里将从头至尾截取了所有内容
-  // 先将 {{ 作为 endToken 通过 happy case
   let endTokens = ['<', context.options.delimiters[0]]
   let endIndex = context.source.length
   for (let i = 0; i < endTokens.length; i++) {
     const index = context.source.indexOf(endTokens[i])
-    if (index !== -1) {
+    // endIndex 应该尽量小
+    if (index !== -1 && index < endIndex) {
       endIndex = index
     }
   }
