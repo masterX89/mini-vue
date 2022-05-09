@@ -9,13 +9,13 @@ const enum TagType {
 export function baseParse(content: string, options = {}) {
   // 将 content 包装至 ctx 中
   const context = createParserContext(content, options)
-  return createRoot(parseChildren(context, ''))
+  return createRoot(parseChildren(context, []))
 }
 
-function parseChildren(context, parentTag) {
+function parseChildren(context, ancestors) {
   const nodes: any = []
   // parseChildren 应该使用循环来处理
-  while (!isEnd(context, parentTag)) {
+  while (!isEnd(context, ancestors)) {
     const s = context.source
     let node
     if (s.startsWith(context.options.delimiters[0])) {
@@ -23,7 +23,7 @@ function parseChildren(context, parentTag) {
     } else if (s[0] === '<') {
       // TODO: 判断条件 startsWith 和 s[0] 的区别是什么
       if (/[a-z]/i.test(s[1])) {
-        node = parseElement(context)
+        node = parseElement(context, ancestors)
       }
     }
     if (!node) {
@@ -35,13 +35,19 @@ function parseChildren(context, parentTag) {
   return nodes
 }
 
-function isEnd(context: any, parentTag) {
+function isEnd(context: any, ancestors) {
   // 结束标签
-  if (parentTag && context.source.startsWith(`</${parentTag}>`)) {
-    return true
+  let s = context.source
+  if (s.startsWith('</')) {
+    for (let i = ancestors.length - 1; i >= 0; i--) {
+      const tag = ancestors[i].tag
+      if (startsWithEndTagOpen(s, tag)) {
+        return true
+      }
+    }
   }
   // context.source 为空
-  return !context.source
+  return !s
 }
 
 function parseText(context: any): any {
@@ -67,14 +73,20 @@ function parseTextData(context: any, length: number): any {
   return content
 }
 
-function parseElement(context: any): any {
+function parseElement(context: any, ancestors): any {
   // StartTag
   const element = parseTag(context, TagType.Start)
+  ancestors.push(element)
   // parseEl 的时候应该也要 递归 parseChildren
   // 否则就变成只解析一个 tag 了
-  element.children = parseChildren(context, element.tag)
+  element.children = parseChildren(context, ancestors)
+  ancestors.pop()
   // EndTag
-  parseTag(context, TagType.End)
+  if (startsWithEndTagOpen(context.source, element.tag)) {
+    parseTag(context, TagType.End)
+  } else {
+    throw new Error(`缺少结束标签: ${element.tag}`)
+  }
   return element
 }
 
@@ -142,6 +154,13 @@ function createParserContext(content: string, rawOptions) {
     options,
     source: content,
   }
+}
+
+function startsWithEndTagOpen(source, tag) {
+  return (
+    source.startsWith('</') &&
+    source.slice(2, 2 + tag.length).toLowerCase() === tag.toLowerCase()
+  )
 }
 
 const defaultParserOptions = {

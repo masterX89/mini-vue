@@ -116,4 +116,10 @@ describe('Parse', () => {
       ],
     })
   })
+
+  test('should throw error when lack tag', () => {
+    expect(() => {
+      const ast = baseParse('<div><p></div>')
+    }).toThrow('缺少结束标签: p')
+  })
 })
