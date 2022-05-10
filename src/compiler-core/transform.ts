@@ -1,6 +1,11 @@
 export function transform(root, options = {}) {
   const context = createTransformerContext(root, options)
   traverseNode(root, context)
+  createRootCodegen(root)
+}
+
+function createRootCodegen(root: any) {
+  root.codegenNode = root.children[0]
 }
 
 function traverseNode(node: any, context) {
