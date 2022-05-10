@@ -1,4 +1,4 @@
-export function transform(root, options) {
+export function transform(root, options = {}) {
   const context = createTransformerContext(root, options)
   traverseNode(root, context)
 }
@@ -21,7 +21,7 @@ function traverseChildren(node, context) {
   }
 }
 
-function createTransformerContext(root: any, options: any = []) {
+function createTransformerContext(root: any, options: any = {}) {
   return {
     root,
     nodeTransforms: options.nodeTransforms || [],
