@@ -9,4 +9,11 @@ describe('code generate', () => {
     const { code } = codegen(ast)
     expect(code).toMatchSnapshot()
   })
+
+  it('should generate interpolation', () => {
+    const ast = baseParse('{{message}}')
+    transform(ast)
+    const { code } = codegen(ast)
+    expect(code).toMatchSnapshot()
+  })
 })

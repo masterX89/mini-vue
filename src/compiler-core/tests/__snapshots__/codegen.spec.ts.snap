@@ -1,5 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`code generate should generate 1`] = `"return function render(_ctx, _cache) {return \\"hi\\"}"`;
+exports[`code generate should generate interpolation 1`] = `
+"const { toDisplayString: _toDisplayString } = Vue
+return function render(_ctx, _cache) {return _toDisplayString(_ctx.message)}"
+`;
 
-exports[`code generate should generate string 1`] = `"return function render(_ctx, _cache) {return \\"hi\\"}"`;
+exports[`code generate should generate string 1`] = `
+"
+return function render(_ctx, _cache) {return \\"hi\\"}"
+`;
