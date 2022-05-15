@@ -407,7 +407,10 @@ export function createRenderer(options) {
           const { proxy } = instance
           // render 的 this 指向的是 proxy
           // proxy 读取 setup 返回值的时通过 handler 处理掉了 setupState
-          const subTree = (instance.subTree = instance.render.call(proxy))
+          const subTree = (instance.subTree = instance.render.call(
+            proxy,
+            proxy
+          ))
           patch(null, subTree, container, instance, anchor)
           // 递归结束, subTree 是 root element, 即最外层的 tag
           // 而这个方法里的 vnode 是一个 componentInstance
@@ -424,7 +427,7 @@ export function createRenderer(options) {
             next.el = vnode.el
             updateComponentPreRender(instance, next)
           }
-          const subTree = instance.render.call(proxy)
+          const subTree = instance.render.call(proxy, proxy)
           const preSubTree = instance.subTree
           // 更新 instance 的 subTree
           instance.subTree = subTree

@@ -77,6 +77,12 @@ function finishComponentSetup(instance: any) {
 
   // 如果 instance 还没有 render
   if (!instance.render) {
+    if (compile && !Component.render) {
+      const template = Component.template
+      if (template) {
+        Component.render = compile(template)
+      }
+    }
     instance.render = Component.render
   }
 }
@@ -88,4 +94,9 @@ export function getCurrentInstance() {
 
 function setCurrentInstance(instance) {
   currentInstance = instance
+}
+
+let compile
+export function registerRuntimeCompiler(_compiler) {
+  compile = _compiler
 }
