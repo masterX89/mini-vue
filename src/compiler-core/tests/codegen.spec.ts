@@ -1,4 +1,4 @@
-import { codegen } from '../codegen'
+import { generate } from '../codegen'
 import { baseParse } from '../parse'
 import { transform } from '../transform'
 import { transformElement } from '../transforms/transformElement'
@@ -9,7 +9,7 @@ describe('code generate', () => {
   it('should generate string', () => {
     const ast = baseParse('hi')
     transform(ast)
-    const { code } = codegen(ast)
+    const { code } = generate(ast)
     expect(code).toMatchSnapshot()
   })
 
@@ -18,7 +18,7 @@ describe('code generate', () => {
     transform(ast, {
       nodeTransforms: [transformExpression],
     })
-    const { code } = codegen(ast)
+    const { code } = generate(ast)
     expect(code).toMatchSnapshot()
   })
 
@@ -27,7 +27,7 @@ describe('code generate', () => {
     transform(ast, {
       nodeTransforms: [transformExpression, transformElement, transformText],
     })
-    const { code } = codegen(ast)
+    const { code } = generate(ast)
     expect(code).toMatchSnapshot()
   })
 })

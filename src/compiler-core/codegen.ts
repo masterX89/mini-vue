@@ -6,7 +6,7 @@ import {
   TO_DISPLAY_STRING,
 } from './runtimeHelpers'
 
-export function codegen(ast) {
+export function generate(ast) {
   const context = generateContext()
   const { push } = context
 
