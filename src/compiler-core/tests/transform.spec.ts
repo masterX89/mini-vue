@@ -1,6 +1,6 @@
-import { NodeTypes } from '../ast'
-import { baseParse } from '../parse'
-import { transform } from '../transform'
+import { NodeTypes } from '../src/ast'
+import { baseParse } from '../src/parse'
+import { transform } from '../src/transform'
 
 describe('transform', () => {
   test('happy path', () => {

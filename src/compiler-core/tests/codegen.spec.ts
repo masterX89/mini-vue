@@ -1,4 +1,4 @@
-import { baseCompile } from '../compile'
+import { baseCompile } from '../src/compile'
 
 describe('code generate', () => {
   it('should generate string', () => {

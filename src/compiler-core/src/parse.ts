@@ -1,4 +1,4 @@
-import { extend } from '../shared'
+import { extend } from '../../shared'
 import { NodeTypes } from './ast'
 
 const enum TagType {
