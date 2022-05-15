@@ -1,33 +1,18 @@
-import { generate } from '../codegen'
-import { baseParse } from '../parse'
-import { transform } from '../transform'
-import { transformElement } from '../transforms/transformElement'
-import { transformExpression } from '../transforms/transformExpression'
-import { transformText } from '../transforms/transformText'
+import { baseCompile } from '../compile'
 
 describe('code generate', () => {
   it('should generate string', () => {
-    const ast = baseParse('hi')
-    transform(ast)
-    const { code } = generate(ast)
+    const { code } = baseCompile('hi')
     expect(code).toMatchSnapshot()
   })
 
   it('should generate interpolation', () => {
-    const ast = baseParse('{{message}}')
-    transform(ast, {
-      nodeTransforms: [transformExpression],
-    })
-    const { code } = generate(ast)
+    const { code } = baseCompile('{{message}}')
     expect(code).toMatchSnapshot()
   })
 
   it('should generate nested element', () => {
-    const ast: any = baseParse('<div>hi, {{message}}</div>')
-    transform(ast, {
-      nodeTransforms: [transformExpression, transformElement, transformText],
-    })
-    const { code } = generate(ast)
+    const { code } = baseCompile('<div>hi, {{message}}</div>')
     expect(code).toMatchSnapshot()
   })
 })
