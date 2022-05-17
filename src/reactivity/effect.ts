@@ -34,6 +34,7 @@ export class ReactiveEffect {
     activeEffect = this
     const result = this._fn()
     shouldTrack = false
+    activeEffect = undefined
     return result
   }
   stop() {
@@ -111,12 +112,18 @@ export function trigger(target, key) {
 export function triggerEffects(dep) {
   dep &&
     dep.forEach((effect) => {
-      if (effect.scheduler) {
-        effect.scheduler()
-      } else {
-        effect.run()
-      }
+      triggerEffect(effect)
     })
+}
+
+function triggerEffect(effect: any) {
+  if (effect !== activeEffect) {
+    if (effect.scheduler) {
+      effect.scheduler()
+    } else {
+      effect.run()
+    }
+  }
 }
 
 // 1. 实例化对象

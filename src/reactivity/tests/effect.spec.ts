@@ -126,4 +126,15 @@ describe('effect', () => {
     stop(runner)
     expect(onStop).toHaveBeenCalled()
   })
+
+  it('should avoid implicit infinite recursive loops with itself', () => {
+    const counter = reactive({ num: 0 })
+    const counterSpy = jest.fn(() => counter.num++)
+    effect(counterSpy)
+    expect(counter.num).toBe(1)
+    expect(counterSpy).toHaveBeenCalledTimes(1)
+    counter.num = 4
+    expect(counter.num).toBe(5)
+    expect(counterSpy).toHaveBeenCalledTimes(2)
+  })
 })
