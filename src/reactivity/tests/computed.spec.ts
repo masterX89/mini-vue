@@ -1,5 +1,7 @@
 import { computed } from '../computed'
-import { reactive } from '../reactive'
+import { isReactive, reactive } from '../reactive'
+import { isRef } from '../ref'
+
 
 describe('computed', () => {
   it('happy path', () => {
@@ -51,5 +53,17 @@ describe('computed', () => {
     // should not compute again
     cValue.value
     expect(getter).toHaveBeenCalledTimes(2)
+  })
+
+  it('isRef should return true', () => {
+    const user = reactive({
+      age: 1,
+    })
+    const age = computed(() => {
+      return user.age
+    })
+    // FIXME: should return true
+    expect(isRef(age)).toBe(true)
+    expect(isReactive(age)).toBe(false)
   })
 })
