@@ -12,7 +12,17 @@ export function transformElement(node, context) {
       let vnodeChildren
       if (children.length > 0) {
         if (children.length === 1) {
-          vnodeChildren = children[0]
+          const child = children[0]
+          const type = child.type
+          // div -> p -> text(interpolation, compound_expression)
+          // p 是单节点不意味着它是叶子节点
+          if (type === NodeTypes.TEXT || type === NodeTypes.INTERPOLATION || type === NodeTypes.COMPOUND_EXPRESSION) {
+            vnodeChildren = child
+          } else {
+            vnodeChildren = children
+          }
+        } else {
+          vnodeChildren = children
         }
       }
       node.codegenNode = createVNodeCall(

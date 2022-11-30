@@ -55,7 +55,7 @@ describe('computed', () => {
     expect(getter).toHaveBeenCalledTimes(2)
   })
 
-  it('isRef should return true', () => {
+  it.skip('isRef should return true', () => {
     const user = reactive({
       age: 1,
     })

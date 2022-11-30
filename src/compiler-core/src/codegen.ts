@@ -83,8 +83,13 @@ function genNodeList(nodes, context) {
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i]
     if (isString(node)) {
+      // tag or null props
       push(node)
+    } else if (Array.isArray(node)) {
+      // Array: children nodes
+      genNodeList(node, context)
     } else {
+      // Object: node
       genNode(node, context)
     }
     if (i < nodes.length - 1) {
