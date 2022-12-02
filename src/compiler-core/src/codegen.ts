@@ -78,16 +78,42 @@ function genElement(node, context) {
   push(')')
 }
 
+function genChildren(nodes, context) {
+  if (nodes.length === 1) {
+    const child = nodes[0]
+    const type = child.type
+    if (type === NodeTypes.TEXT || type === NodeTypes.INTERPOLATION || type === NodeTypes.COMPOUND_EXPRESSION) {
+      genNodeList(nodes, context)
+    } else {
+      genNodeListAsArray(nodes, context)
+    }
+  } else {
+    genNodeListAsArray(nodes, context)
+  }
+}
+
+function genNodeListAsArray(nodes, context) {
+  const { push } = context
+  push('[')
+  genNodeList(nodes, context)
+  push(']')
+}
+
 function genNodeList(nodes, context) {
   const { push } = context
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i]
     if (isString(node)) {
       // tag or null props
-      push(node)
+      // FIXME: 可能来自 node 也可能来自 node.codegenNode 需要做统一
+      if (node.slice(0, 1) === '"' || node === 'null') {
+        push(node)
+      } else {
+        push(`"${node}"`)
+      }
     } else if (Array.isArray(node)) {
       // Array: children nodes
-      genNodeList(node, context)
+      genChildren(node, context)
     } else {
       // Object: node
       genNode(node, context)

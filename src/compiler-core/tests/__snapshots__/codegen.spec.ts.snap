@@ -12,7 +12,7 @@ return function render(_ctx, _cache) {return _createElementVNode(\\"div\\", null
 
 exports[`code generate should generate paragraph nested element 1`] = `
 "const { createElementVNode: _createElementVNode, toDisplayString: _toDisplayString } = Vue
-return function render(_ctx, _cache) {return _createElementVNode(\\"div\\", null, _createElementVNode(p, null, \\"hello\\"), \\",\\", _createElementVNode(p, null, _toDisplayString(_ctx.msg)))}"
+return function render(_ctx, _cache) {return _createElementVNode(\\"div\\", null, [_createElementVNode(\\"p\\", null, \\"hello\\"), _createElementVNode(\\"p\\", null, _toDisplayString(_ctx.msg))])}"
 `;
 
 exports[`code generate should generate string 1`] = `
